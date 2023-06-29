@@ -1,0 +1,100 @@
+<style>
+    .lifepath-container {
+      display: inline-flex;
+      margin-bottom: 10px;
+    }
+
+    .lifepath-container input {
+      width: 100px;
+      margin-right: 10px;
+    }
+
+    .result-container {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    .error-container {
+      color: red;
+      font-weight: bold;
+    }
+</style>
+
+
+
+<form id="birthdateForm">
+    <div class="lifepath-container">
+      <input type="number" id="month" min="1" max="12" placeholder="MM" required>
+      <input type="number" id="day" min="1" max="31" placeholder="DD" required>
+      <input type="number" id="year" min="1900" max="2100" placeholder="YYYY" required>
+    </div>
+    <button type="submit">Calculate</button>
+  </form>
+
+  <div class="result-container" id="result"></div>
+  <div class="error-container" id="error"></div>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.getElementById('birthdateForm');
+  const resultContainer = document.getElementById('result');
+  const errorContainer = document.getElementById('error');
+
+  form.addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    const monthInput = document.getElementById('month');
+    const dayInput = document.getElementById('day');
+    const yearInput = document.getElementById('year');
+
+    if (!isNumeric(monthInput.value) || !isNumeric(dayInput.value) || !isNumeric(yearInput.value)) {
+      errorContainer.textContent = 'Please fill in your birthday completely with numbers!';
+      resultContainer.textContent = '';
+      return;
+    }
+
+    const birthdate = monthInput.value + dayInput.value + yearInput.value;
+
+    const lifePathNumbers = calculateLifePathNumbers(birthdate);
+
+    if (lifePathNumbers.length === 0) {
+      errorContainer.textContent = 'Invalid birthdate. Please enter a valid date.';
+      resultContainer.textContent = '';
+    } else {
+      errorContainer.textContent = '';
+      resultContainer.textContent = 'Life Path Numbers: ' + lifePathNumbers.join(', ');
+    }
+  });
+});
+
+function isNumeric(value) {
+  return /^\d+$/.test(value);
+}
+
+function calculateLifePathNumbers(birthdate) {
+  const lifePathNumbers = [];
+  let reducedNumber = reduceToSingleDigit(birthdate);
+
+  // Special handling for master numbers 11, 22, and 33
+  if (reducedNumber === 11 || reducedNumber === 22 || reducedNumber === 33) {
+    lifePathNumbers.push(reducedNumber);
+  } else {
+    while (reducedNumber > 9) {
+      lifePathNumbers.push(reducedNumber);
+      reducedNumber = reduceToSingleDigit(reducedNumber.toString());
+    }
+    lifePathNumbers.push(reducedNumber);
+  }
+
+  return lifePathNumbers;
+}
+
+function reduceToSingleDigit(number) {
+  let sum = 0;
+  for (let i = 0; i < number.length; i++) {
+    sum += parseInt(number[i]);
+  }
+  return sum > 9 ? reduceToSingleDigit(sum.toString()) : sum;
+}
+</script>
