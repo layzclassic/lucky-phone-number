@@ -1,0 +1,135 @@
+<style>
+    .expression-container {
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .expression-container input {
+        width: 330px;
+    }
+
+    .expression-container button {
+        margin-left: 10px;
+    }
+
+    .result-container2 {
+        margin-top: 10px;
+        font-weight: bold;
+    }
+
+    .error-container2 {
+        color: red;
+        font-weight: bold;
+    }
+</style>
+  
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const form = document.getElementById('expressionNumberForm');
+      form.addEventListener('submit', function(event) {
+        event.preventDefault();
+        calculateExpressionNumber();
+      });
+
+      function calculateExpressionNumber() {
+        const businessNameInput = document.getElementById('businessName');
+        const resultContainer = document.getElementById('expressionNumberResult');
+        const errorContainer = document.getElementById('expressionNumberError');
+
+        const businessNameValue = businessNameInput.value.trim();
+
+        if (businessNameValue === '') {
+          errorContainer.textContent = 'Please fill in the business name!';
+          resultContainer.textContent = '';
+          return;
+        }
+
+        const expressionNumber = getExpressionNumber(businessNameValue);
+
+        if (isNaN(expressionNumber)) {
+          errorContainer.textContent = 'Invalid business name. Please enter a valid name.';
+          resultContainer.textContent = '';
+        } else {
+          errorContainer.textContent = '';
+          resultContainer.textContent = 'Expression Number: ' + expressionNumber;
+        }
+      }
+
+      function getExpressionNumber(businessName) {
+        const name = businessName.toUpperCase();
+        let expressionNumber = 0;
+
+        for (let i = 0; i < name.length; i++) {
+          const letter = name[i];
+          let value = 0;
+
+          switch (letter) {
+            case 'A':
+            case 'J':
+            case 'S':
+              value = 1;
+              break;
+            case 'B':
+            case 'K':
+            case 'T':
+              value = 2;
+              break;
+            case 'C':
+            case 'L':
+            case 'U':
+              value = 3;
+              break;
+            case 'D':
+            case 'M':
+            case 'V':
+              value = 4;
+              break;
+            case 'E':
+            case 'N':
+            case 'W':
+              value = 5;
+              break;
+            case 'F':
+            case 'O':
+            case 'X':
+              value = 6;
+              break;
+            case 'G':
+            case 'P':
+            case 'Y':
+              value = 7;
+              break;
+            case 'H':
+            case 'Q':
+            case 'Z':
+              value = 8;
+              break;
+            case 'I':
+            case 'R':
+              value = 9;
+              break;
+            default:
+              value = 0;
+              break;
+          }
+
+          expressionNumber += value;
+        }
+
+        return expressionNumber;
+      }
+    });
+  </script>
+  
+<form id="expressionNumberForm">
+    <div class="expression-container">
+        <input type="text" id="businessName" placeholder="Business Name" required>
+        <button type="submit">Calculate</button>
+    </div>
+</form>
+
+
+  <div>
+    <p class="error-container2" id="expressionNumberError"></p>
+    <p class="result-container2" id="expressionNumberResult"></p>
+  </div>
