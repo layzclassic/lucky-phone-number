@@ -1,0 +1,132 @@
+<style>
+  .vanity-container {
+    display: inline-flex;
+    margin-bottom: 10px;
+  }
+
+  .vanity-container input {
+    width: 200px;
+    margin-right: 10px;
+  }
+
+  .vanity-result-container {
+    margin-top: 10px;
+    font-weight: bold;
+  }
+
+  .vanity-error-container {
+    color: red;
+    font-weight: bold;
+  }
+</style>
+
+<form id="vanityNumberForm">
+  <div class="vanity-container">
+    <label for="lifePathNumber">Life Path Number:</label>
+    <input type="number" id="lifePathNumber" min="1" max="9">
+  </div>
+  <div class="vanity-container">
+    <label for="expressionNumber">Expression Number:</label>
+    <input type="number" id="expressionNumber" min="1" max="9">
+  </div>
+  <div class="vanity-container">
+    <label for="characters">Characters:</label>
+    <input type="text" id="characters" maxlength="7">
+  </div>
+  <button type="submit">Generate</button>
+</form>
+
+<div class="vanity-result-container" id="vanityResult"></div>
+<div class="vanity-error-container" id="vanityError"></div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('vanityNumberForm');
+    form.addEventListener('submit', function(event) {
+      event.preventDefault();
+      generateVanityNumber();
+    });
+
+    function generateVanityNumber() {
+      const lifePathNumberInput = document.getElementById('lifePathNumber');
+      const expressionNumberInput = document.getElementById('expressionNumber');
+      const charactersInput = document.getElementById('characters');
+      const resultContainer = document.getElementById('vanityResult');
+      const errorContainer = document.getElementById('vanityError');
+
+      const lifePathNumber = lifePathNumberInput.value;
+      const expressionNumber = expressionNumberInput.value;
+      const characters = charactersInput.value.toUpperCase();
+
+      if (
+        (lifePathNumber === '' || !isNumeric(lifePathNumber)) &&
+        (expressionNumber === '' || !isNumeric(expressionNumber)) &&
+        characters === ''
+      ) {
+        errorContainer.textContent = 'Please fill in at least one of the fields!';
+        resultContainer.textContent = '';
+        return;
+      }
+
+      const vanityNumber = generateRandomVanityNumber(expressionNumber, characters);
+
+      if (vanityNumber === '') {
+        errorContainer.textContent = 'Sorry, this combination is not possible. Try another one!';
+        resultContainer.textContent = '';
+        setTimeout(function() {
+          errorContainer.textContent = 'Hold on for 10 seconds, we are looking for your number!';
+        }, 10000);
+      } else {
+        errorContainer.textContent = '';
+        resultContainer.textContent =
+          'Here is 1 possible combination:\n(###)' +
+          generateRandomPhoneNumber() +
+          ' - (###)' +
+          vanityNumber +
+          '\nClick again to find more results!';
+      }
+    }
+
+    function isNumeric(value) {
+      return /^\d+$/.test(value);
+    }
+
+    function generateRandomVanityNumber(expressionNumber, characters) {
+      const vanityMap = {
+        2: ['A', 'B', 'C'],
+        3: ['D', 'E', 'F'],
+        4: ['G', 'H', 'I'],
+        5: ['J', 'K', 'L'],
+        6: ['M', 'N', 'O'],
+        7: ['P', 'Q', 'R', 'S'],
+        8: ['T', 'U', 'V'],
+        9: ['W', 'X', 'Y', 'Z'],
+      };
+
+      let suffix = '';
+      const numbersCount = 7 - characters.length;
+
+      for (let i = 0; i < numbersCount; i++) {
+        const randomNumber = Math.floor(Math.random() * 10);
+        suffix += randomNumber;
+      }
+
+      for (let i = 0; i < characters.length; i++) {
+        const char = characters[i];
+        const expressionChar = expressionNumber[i % expressionNumber.length];
+        const expressionDigit = vanityMap[parseInt(expressionChar, 10)];
+        suffix += expressionDigit[parseInt(char, 36) % expressionDigit.length];
+      }
+
+      return suffix.length === 7 ? suffix : '';
+    }
+
+    function generateRandomPhoneNumber() {
+      let phoneNumber = '';
+      for (let i = 0; i < 3; i++) {
+        phoneNumber += Math.floor(Math.random() * 10);
+      }
+      return phoneNumber;
+    }
+  });
+</script>
