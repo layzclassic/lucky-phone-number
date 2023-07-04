@@ -1,37 +1,45 @@
 <style>
-    .expression-container {
-        display: inline-flex;
-        align-items: center;
-    }
+.expression-container {
+		display: inline-flex;
+    margin-bottom: 10px;
+}
+.expression-container input {
+    width: 330px;
+    margin-right: 10px;
+}
 
-    .expression-container input {
-        width: 330px;
-    }
+.expression-output-container {
+    display: block;
+    width: 100%;
+}
 
-    .expression-container button {
-        margin-left: 10px;
-    }
+.expression-result-container {
+		margin-top: 10px;
+    font-weight: bold;
+    height: 5px;
+}
+.expression-error-container {
+		margin-top: 10px;
+    color: red;
+    font-weight: bold;
+    height: 5px;
+}
 
-    .result-container2 {
-        margin-top: 10px;
-        font-weight: bold;
-    }
-
-    .error-container2 {
-        color: red;
-        font-weight: bold;
-    }
+.expression-valid {
+    color: green;
+}
 </style>
   
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const form = document.getElementById('expressionNumberForm');
-      form.addEventListener('submit', function(event) {
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('expressionNumberForm');
+    const calculateButton = form.querySelector('button[type="submit"]');
+    calculateButton.addEventListener('click', function(event) {
         event.preventDefault();
         calculateExpressionNumber();
-      });
+    });
 
-      function calculateExpressionNumber() {
+    function calculateExpressionNumber() {
         const businessNameInput = document.getElementById('businessName');
         const resultContainer = document.getElementById('expressionNumberResult');
         const errorContainer = document.getElementById('expressionNumberError');
@@ -39,97 +47,124 @@
         const businessNameValue = businessNameInput.value.trim();
 
         if (businessNameValue === '') {
-          errorContainer.textContent = 'Please fill in the business name!';
-          resultContainer.textContent = '';
-          return;
+            errorContainer.textContent = 'Please fill in the business name!';
+            resultContainer.textContent = '';
+            return;
         }
 
         const expressionNumber = getExpressionNumber(businessNameValue);
 
-        if (isNaN(expressionNumber)) {
-          errorContainer.textContent = 'Invalid business name. Please enter a valid name.';
-          resultContainer.textContent = '';
+        if (expressionNumber === null) {
+            errorContainer.textContent = 'Invalid business name. Please enter a valid name.';
+            resultContainer.textContent = '';
         } else {
-          errorContainer.textContent = '';
-          resultContainer.textContent = 'Expression Number: ' + expressionNumber;
+            errorContainer.textContent = '';
+            resultContainer.textContent = 'Expression Number: ' + expressionNumber;
         }
-      }
+    }
 
-      function getExpressionNumber(businessName) {
+    function getExpressionNumber(businessName) {
         const name = businessName.toUpperCase();
         let expressionNumber = 0;
 
         for (let i = 0; i < name.length; i++) {
-          const letter = name[i];
-          let value = 0;
+            const letter = name[i];
+            let value = 0;
 
-          switch (letter) {
-            case 'A':
-            case 'J':
-            case 'S':
-              value = 1;
-              break;
-            case 'B':
-            case 'K':
-            case 'T':
-              value = 2;
-              break;
-            case 'C':
-            case 'L':
-            case 'U':
-              value = 3;
-              break;
-            case 'D':
-            case 'M':
-            case 'V':
-              value = 4;
-              break;
-            case 'E':
-            case 'N':
-            case 'W':
-              value = 5;
-              break;
-            case 'F':
-            case 'O':
-            case 'X':
-              value = 6;
-              break;
-            case 'G':
-            case 'P':
-            case 'Y':
-              value = 7;
-              break;
-            case 'H':
-            case 'Q':
-            case 'Z':
-              value = 8;
-              break;
-            case 'I':
-            case 'R':
-              value = 9;
-              break;
-            default:
-              value = 0;
-              break;
-          }
+            switch (letter) {
+                case 'A':
+                case 'J':
+                case 'S':
+                case 'I':
+                case 'R':
+                    value = 1;
+                    break;
+                case 'B':
+                case 'K':
+                case 'T':
+                    value = 2;
+                    break;
+                case 'C':
+                case 'L':
+                case 'U':
+                    value = 3;
+                    break;
+                case 'D':
+                case 'M':
+                case 'V':
+                    value = 4;
+                    break;
+                case 'E':
+                case 'N':
+                case 'W':
+                    value = 5;
+                    break;
+                case 'F':
+                case 'O':
+                case 'X':
+                    value = 6;
+                    break;
+                case 'G':
+                case 'P':
+                case 'Y':
+                    value = 7;
+                    break;
+                case 'H':
+                case 'Q':
+                case 'Z':
+                    value = 8;
+                    break;
+                default:
+                    value = null;
+                    break;
+            }
 
-          expressionNumber += value;
+            if (value === null) {
+                return null; // Invalid character found
+            }
+
+            expressionNumber += value;
+        }
+
+        // Reduce the expression number to a single digit or master number
+        while (expressionNumber > 9) {
+            expressionNumber = reduceToSingleDigit(expressionNumber);
         }
 
         return expressionNumber;
-      }
+    }
+
+    function reduceToSingleDigit(number) {
+        if (number === 11 || number === 22 || number === 33) {
+            return number; // Master numbers should not be reduced
+        }
+
+        let sum = 0;
+        while (number > 0) {
+            sum += number % 10;
+            number = Math.floor(number / 10);
+        }
+
+        return sum;
+    }
+    
+    // Reset form on button click
+    calculateButton.addEventListener('click', function() {
+        const form = document.getElementById('expressionNumberForm');
+        form.reset();
     });
-  </script>
+});
+</script>
   
 <form id="expressionNumberForm">
+		<h4>Step 2: Fill in your name</h4>
     <div class="expression-container">
         <input type="text" id="businessName" placeholder="Business Name" required>
-        <button type="submit">Calculate</button>
     </div>
+    <button type="submit">Calculate</button>
 </form>
 
-
-  <div>
-    <p class="error-container2" id="expressionNumberError"></p>
-    <p class="result-container2" id="expressionNumberResult"></p>
-  </div>
+<div>
+    <div class="expression-error-container" id="expressionNumberError"></div>
+    <div class="expression-result-container" id="expressionNumberResult"></div>
+</div>
