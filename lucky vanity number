@@ -1,132 +1,148 @@
 <style>
-  .vanity-container {
+#vanity-container {
     display: inline-flex;
+}
+.vanity-container {
+    align-items: center;
+}
+.vanity-container button {
+    display: inline-flex;
+}
+.vanity-container input {
+    width: 250px;
     margin-bottom: 10px;
-  }
-
-  .vanity-container input {
-    width: 200px;
     margin-right: 10px;
-  }
-
-  .vanity-result-container {
-    margin-top: 10px;
+}
+.output-container {
+    display: block;
+    width: 100%;
+}
+.vanity-result-container3 {
     font-weight: bold;
-  }
-
-  .vanity-error-container {
+    height: 60px;
+}
+.vanity-error-container3 {
     color: red;
     font-weight: bold;
-  }
+    margin-bottom:10px;
+    height: 20px; 
+}
+.valid {
+    color: green;
+}
+.unused {
+    color: lightgrey;
+}
+.used {
+    color: green;
+}
 </style>
 
-<form id="vanityNumberForm">
-  <div class="vanity-container">
-    <label for="lifePathNumber">Life Path Number:</label>
-    <input type="number" id="lifePathNumber" min="1" max="9">
-  </div>
-  <div class="vanity-container">
-    <label for="expressionNumber">Expression Number:</label>
-    <input type="number" id="expressionNumber" min="1" max="9">
-  </div>
-  <div class="vanity-container">
-    <label for="characters">Characters:</label>
-    <input type="text" id="characters" maxlength="7">
-  </div>
-  <button type="submit">Generate</button>
-</form>
+<div id="vanity-container">
+    <form id="vanityNumberForm">
+    		<h4>Step 3: Fill in your lucky numbers</h4>
+        <div class="vanity-container">
+            <input type="number" id="vanity_lifePathNumber" placeholder="Life Path Number" required min="1" max="99" maxlength="2" required>
+            <input type="number" id="vanity_expressionNumber" placeholder="Expression Number" required min="1" max="99" maxlength="2" required>
+            <button type="button" id="exploreBtn">Explore</button>
+        </div>
+        <h4>Step 4: Make your own vanity number</h4>
+        <div class="vanity-container">
+            <input type="text" id="vanity_characters" placeholder="Vanity Number" required pattern="^[a-zA-Z0-9]{7}$" maxlength="7" required>
+            <button type="button" id="checkBtn">Check</button>
+        </div>
+    </form>
+</div>
 
-<div class="vanity-result-container" id="vanityResult"></div>
-<div class="vanity-error-container" id="vanityError"></div>
+<div class="output-container">
+    <div class="vanity-error-container3" id="vanityError"></div>
+    <div class="vanity-result-container3" id="vanityResult"></div>
+</div>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('vanityNumberForm');
-    form.addEventListener('submit', function(event) {
-      event.preventDefault();
-      generateVanityNumber();
+    const numberToLetters = {
+        '2': ['A', 'B', 'C'],
+        '3': ['D', 'E', 'F'],
+        '4': ['G', 'H', 'I'],
+        '5': ['J', 'K', 'L'],
+        '6': ['M', 'N', 'O'],
+        '7': ['P', 'Q', 'R', 'S'],
+        '8': ['T', 'U', 'V'],
+        '9': ['W', 'X', 'Y', 'Z']
+    };
+
+    const vanityResult = document.getElementById('vanityResult');
+    const vanityError = document.getElementById('vanityError');
+
+    document.getElementById('exploreBtn').addEventListener('click', function() {
+        // Reset Error and Result
+        vanityError.textContent = '';
+        vanityResult.innerHTML = '';
+
+        let lifePathNumber = document.getElementById('vanity_lifePathNumber').value;
+        let expressionNumber = document.getElementById('vanity_expressionNumber').value;
+        
+        // handle double digit master numbers
+        lifePathNumber = ['11', '22', '33'].includes(lifePathNumber) ? lifePathNumber[0] : lifePathNumber;
+        expressionNumber = ['11', '22', '33'].includes(expressionNumber) ? expressionNumber[0] : expressionNumber;
+
+        let lifePathLetters = numberToLetters[lifePathNumber];
+        let expressionLetters = numberToLetters[expressionNumber];
+
+        if (lifePathNumber == '0' || lifePathNumber == '1' || expressionNumber == '0' || expressionNumber == '1') {
+            vanityError.textContent = 'Sorry, there is no 0 and 1 in vanity number!';
+        } else if (lifePathLetters && expressionLetters) {
+            vanityResult.innerHTML = `You need to use: <br> 
+            <span id="lifePathNumber" class="unused">${lifePathNumber}</span> <span id="lifePathEqual" class="unused">=</span> <span id="lifePathLetters" class="unused">${lifePathLetters.join(', ')}</span> <br> 
+            <span id="expressionNumber" class="unused">${expressionNumber}</span> <span id="expressionEqual" class="unused">=</span> <span id="expressionLetters" class="unused">${expressionLetters.join(', ')}</span>`;
+            vanityResult.setAttribute('data-lifePathNumber', lifePathNumber);
+            vanityResult.setAttribute('data-expressionNumber', expressionNumber);
+        } else {
+            vanityResult.innerHTML = '';
+            vanityError.textContent = 'Invalid Life Path or Expression Number';
+        }
     });
 
-    function generateVanityNumber() {
-      const lifePathNumberInput = document.getElementById('lifePathNumber');
-      const expressionNumberInput = document.getElementById('expressionNumber');
-      const charactersInput = document.getElementById('characters');
-      const resultContainer = document.getElementById('vanityResult');
-      const errorContainer = document.getElementById('vanityError');
+    document.getElementById('checkBtn').addEventListener('click', function() {
+        // Reset classes
+        resetClasses();
 
-      const lifePathNumber = lifePathNumberInput.value;
-      const expressionNumber = expressionNumberInput.value;
-      const characters = charactersInput.value.toUpperCase();
+        let characters = document.getElementById('vanity_characters').value.toUpperCase();
+        if (characters.length < 7) {
+            vanityError.textContent = 'Fill in 7 characters, letters or numbers';
+            return;
+        }
 
-      if (
-        (lifePathNumber === '' || !isNumeric(lifePathNumber)) &&
-        (expressionNumber === '' || !isNumeric(expressionNumber)) &&
-        characters === ''
-      ) {
-        errorContainer.textContent = 'Please fill in at least one of the fields!';
-        resultContainer.textContent = '';
-        return;
-      }
+        let lifePathNumber = vanityResult.getAttribute('data-lifePathNumber');
+        let expressionNumber = vanityResult.getAttribute('data-expressionNumber');
+        checkCharacters(characters, lifePathNumber, expressionNumber);
+    });
 
-      const vanityNumber = generateRandomVanityNumber(expressionNumber, characters);
-
-      if (vanityNumber === '') {
-        errorContainer.textContent = 'Sorry, this combination is not possible. Try another one!';
-        resultContainer.textContent = '';
-        setTimeout(function() {
-          errorContainer.textContent = 'Hold on for 10 seconds, we are looking for your number!';
-        }, 10000);
-      } else {
-        errorContainer.textContent = '';
-        resultContainer.textContent =
-          'Here is 1 possible combination:\n(###)' +
-          generateRandomPhoneNumber() +
-          ' - (###)' +
-          vanityNumber +
-          '\nClick again to find more results!';
-      }
+    function updateClass(id, condition) {
+        document.getElementById(id).className = condition ? 'used' : 'unused';
     }
 
-    function isNumeric(value) {
-      return /^\d+$/.test(value);
+    function resetClasses() {
+        let ids = ['lifePathNumber', 'lifePathEqual', 'lifePathLetters', 'expressionNumber', 'expressionEqual', 'expressionLetters'];
+        ids.forEach(id => document.getElementById(id).className = 'unused');
     }
 
-    function generateRandomVanityNumber(expressionNumber, characters) {
-      const vanityMap = {
-        2: ['A', 'B', 'C'],
-        3: ['D', 'E', 'F'],
-        4: ['G', 'H', 'I'],
-        5: ['J', 'K', 'L'],
-        6: ['M', 'N', 'O'],
-        7: ['P', 'Q', 'R', 'S'],
-        8: ['T', 'U', 'V'],
-        9: ['W', 'X', 'Y', 'Z'],
-      };
+    function checkCharacters(characters, lifePathNumber, expressionNumber) {
+        let lifePathUsed = characters.split('').some(char => numberToLetters[lifePathNumber].includes(char));
+        let expressionUsed = characters.split('').some(char => numberToLetters[expressionNumber].includes(char));
 
-      let suffix = '';
-      const numbersCount = 7 - characters.length;
+        // Change classes based on usage
+        updateClass('lifePathNumber', lifePathUsed);
+        updateClass('lifePathEqual', lifePathUsed);
+        updateClass('lifePathLetters', lifePathUsed);
+        updateClass('expressionNumber', expressionUsed);
+        updateClass('expressionEqual', expressionUsed);
+        updateClass('expressionLetters', expressionUsed);
 
-      for (let i = 0; i < numbersCount; i++) {
-        const randomNumber = Math.floor(Math.random() * 10);
-        suffix += randomNumber;
-      }
-
-      for (let i = 0; i < characters.length; i++) {
-        const char = characters[i];
-        const expressionChar = expressionNumber[i % expressionNumber.length];
-        const expressionDigit = vanityMap[parseInt(expressionChar, 10)];
-        suffix += expressionDigit[parseInt(char, 36) % expressionDigit.length];
-      }
-
-      return suffix.length === 7 ? suffix : '';
+        if (lifePathUsed && expressionUsed) {
+            vanityError.innerHTML = '<span class="valid">This vanity number works!</span>';
+        } else {
+            vanityError.textContent = 'Use all your lucky numbers!';
+        }
     }
-
-    function generateRandomPhoneNumber() {
-      let phoneNumber = '';
-      for (let i = 0; i < 3; i++) {
-        phoneNumber += Math.floor(Math.random() * 10);
-      }
-      return phoneNumber;
-    }
-  });
 </script>
